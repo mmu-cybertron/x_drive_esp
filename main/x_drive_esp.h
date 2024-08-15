@@ -16,24 +16,26 @@
 
 static const char *TAG = "Log";
 
-#define MOTOR_1_PWM GPIO_NUM_2 // Under timer0
-#define MOTOR_2_PWM GPIO_NUM_4 // Under timer0
+#define MOTOR_1_PWM GPIO_NUM_19 // Under timer0
+#define MOTOR_2_PWM GPIO_NUM_18 // Under timer0
 #define MOTOR_3_PWM GPIO_NUM_16 // Under timer1
 #define MOTOR_4_PWM GPIO_NUM_17 // Under timer1
 
 #define MOTOR_1_DIR GPIO_NUM_5
-#define MOTOR_2_DIR GPIO_NUM_18
-#define MOTOR_3_DIR GPIO_NUM_19
-#define MOTOR_4_DIR GPIO_NUM_21
+#define MOTOR_2_DIR GPIO_NUM_15
+#define MOTOR_3_DIR GPIO_NUM_13
+#define MOTOR_4_DIR GPIO_NUM_12
 
-#define ENCODER1_PIN_A GPIO_NUM_26
-#define ENCODER1_PIN_B GPIO_NUM_25
-#define ENCODER2_PIN_A GPIO_NUM_33
-#define ENCODER2_PIN_B GPIO_NUM_32
-#define ENCODER3_PIN_A GPIO_NUM_35
-#define ENCODER3_PIN_B GPIO_NUM_34
-#define ENCODER4_PIN_A GPIO_NUM_39
-#define ENCODER4_PIN_B GPIO_NUM_36
+#define MOTOR_DIR_BIT_MASK ((1ULL << MOTOR_1_DIR) | (1ULL << MOTOR_2_DIR) | (1ULL << MOTOR_3_DIR) | (1ULL << MOTOR_4_DIR))
+
+#define ENCODER1_PIN_A GPIO_NUM_36
+#define ENCODER1_PIN_B GPIO_NUM_39
+#define ENCODER2_PIN_A GPIO_NUM_35
+#define ENCODER2_PIN_B GPIO_NUM_34
+#define ENCODER3_PIN_A GPIO_NUM_32
+#define ENCODER3_PIN_B GPIO_NUM_27
+#define ENCODER4_PIN_A GPIO_NUM_26
+#define ENCODER4_PIN_B GPIO_NUM_25
 
 #define TIMER_RESOLUTION 80000000 // 80Mhz which is half of the 160Mhz source used
 #define COUNTER_PERIOD 4000 // 4000 ticks for 20kHz PWM used for Cytron MD10C motor driver
@@ -43,21 +45,21 @@ static const char *TAG = "Log";
 
 #define MCPWM_COMPRATOR_MAX 1999 // Max value for comparator
 
-#define INIT_TARGET_SPEED_M1 0.1 // Initial speed in pulse per us
-#define INIT_TARGET_SPEED_M2 0.1
-#define INIT_TARGET_SPEED_M3 0.1
-#define INIT_TARGET_SPEED_M4 0.1
+#define INIT_TARGET_SPEED_M1 0 // Initial speed in pulse per us
+#define INIT_TARGET_SPEED_M2 0
+#define INIT_TARGET_SPEED_M3 0
+#define INIT_TARGET_SPEED_M4 0
 
-#define KP_M1 1000
-#define KI_M1 100
+#define KP_M1 10000
+#define KI_M1 1000
 #define KD_M1 0
 
-#define KP_M2 1000
-#define KI_M2 100
+#define KP_M2 10000
+#define KI_M2 1000
 #define KD_M2 0
 
-#define KP_M3 1000
-#define KI_M3 100
+#define KP_M3 10000
+#define KI_M3 1000
 #define KD_M3 0
 
 #define KP_M4 1000

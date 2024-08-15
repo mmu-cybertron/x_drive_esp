@@ -10,14 +10,17 @@
 ***********************************************************************************************/
 #include "x_drive_esp.h"
 #include "ps5.h"
+#include <math.h>
 
 void app_main(void)
 {
     // Declare the struct array, which contains the pwm and pcnt handler
     pid_controller_t pid_params[4] = {0};
-    initialize_peripherals(pid_params);
+    initialize_peripherals(pid_params);     
 
     // Initialize PS5 controller
+    // uint8_t new_mac[8] = {0x24,0xA6,0xFA,0x3B,0x93,0x0A};
+    // ps5SetBluetoothMacAddress(new_mac);
     ps5Init(); 
     while (!ps5IsConnected()) {
         ESP_LOGI("PS5", "Waiting for PS5 controller to connect...");
@@ -48,19 +51,64 @@ void app_main(void)
     xTaskCreatePinnedToCore(&print_debug, "print_debug", 2048, (void*)pid_params, 1, NULL, 1);               
 
     while(1){
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        // mcpwm_comparator_set_compare_value(pid_params[0].motor, 1000);
+        // mcpwm_comparator_set_compare_value(pid_params[1].motor, 1000);
+        // mcpwm_comparator_set_compare_value(pid_params[2].motor, 1000);
+        // mcpwm_comparator_set_compare_value(pid_params[3].motor, 1000);
+        // gpio_set_level(MOTOR_1_DIR, 0);
+        // gpio_set_level(MOTOR_2_DIR, 0);
+        // gpio_set_level(MOTOR_3_DIR, 0);
+        // gpio_set_level(MOTOR_4_DIR, 0);
+        // vTaskDelay(pdMS_TO_TICKS(2000));
+        // gpio_set_level(MOTOR_1_DIR, 1);
+        // gpio_set_level(MOTOR_2_DIR, 1);
+        // gpio_set_level(MOTOR_3_DIR, 1);
+        // gpio_set_level(MOTOR_4_DIR, 1);
+        // vTaskDelay(pdMS_TO_TICKS(2000));
+
+        // ESP_LOGI(TAG, "Current Speed: Positive");
+        // pid_params[2].target_speed = 0.1;   
+        // vTaskDelay(pdMS_TO_TICKS(2000));
+        // ESP_LOGI(TAG, "Current Speed: Zero");
+        // pid_params[2].target_speed = 0; 
+        // vTaskDelay(pdMS_TO_TICKS(1000));
+        // ESP_LOGI(TAG, "Current Speed: Negative");   
+        // pid_params[2].target_speed = -0.1; 
+        // vTaskDelay(pdMS_TO_TICKS(2000));
+
     }
 
-}
+}   
 
 void cb ( void* arg, ps5_t ps5, ps5_event_t event) {
-    // pid_controller_t *pid_params = (pid_controller_t *)arg;
-    // if (ps5.analog.stick.ly > 0){
-    //     float value = (float)ps5.analog.stick.ly/127.0 * MCPWM_COMPRATOR_MAX;
-    //     mcpwm_comparator_set_compare_value(pid_params[0].motor, (uint32_t)value);
-    // }else{
-    //     mcpwm_comparator_set_compare_value(pid_params[0].motor, 0);
-    // }
+    pid_controller_t *pid_params = (pid_controller_t *)arg;
+    int8_t lx = ps5.analog.stick.lx;
+    int8_t ly = ps5.analog.stick.ly;
+    int8_t rx = ps5.analog.stick.rx;
+
+    // Remove deadzone of the controller
+    if (lx < 3 && lx > -3) lx = 0;
+    if (ly < 3 && ly > -3) ly = 0;
+    if (rx < 3 && rx > -3) rx = 0;
+    
+    float theta =  atan2f((float)ly, (float)-lx);
+    float mag = sqrtf((float)(lx*lx + ly*ly));
+
+    float M1 = 1.5 * mag * cosf(theta - 3.14159/4) - rx/3;
+    float M2 = 1.5 * mag * -sinf(theta - 3.14159/4) - rx/3;
+    float M3 = 1.5 * mag * -cosf(theta - 3.14159/4) - rx/3;
+    float M4 = 1.5 * mag * sinf(theta - 3.14159/4) - rx/3;
+
+    M1 = M1/308.0 * 0.50;     
+    M2 = M2/308.0 * 0.50;     
+    M3 = M3/308.0 * 0.50;     
+    M4 = M4/308.0 * 0.50;     
+
+    pid_params[0].target_speed = M1; 
+    pid_params[1].target_speed = M2; 
+    pid_params[2].target_speed = M3; 
+    pid_params[3].target_speed = M4; 
+
 }
 
 // Periodic timer callback to update PID output

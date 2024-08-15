@@ -35,11 +35,11 @@ int64_t prev_time = 0, curr_time = 0, delta_time = 0;
 
 void initialize_peripherals(pid_controller_t *pid_params){
 
-
-    gpio_set_direction(MOTOR_1_DIR, GPIO_MODE_OUTPUT);
-    gpio_set_direction(MOTOR_2_DIR, GPIO_MODE_OUTPUT);
-    gpio_set_direction(MOTOR_3_DIR, GPIO_MODE_OUTPUT);
-    gpio_set_direction(MOTOR_4_DIR, GPIO_MODE_OUTPUT);
+    gpio_config_t motor_dir_config = {
+        .pin_bit_mask = MOTOR_DIR_BIT_MASK,
+        .mode = GPIO_MODE_OUTPUT,
+    };
+    gpio_config(&motor_dir_config);
 
     // Configure mcpwm timer
     mcpwm_timer_handle_t timer0 = NULL, timer1 = NULL;
@@ -217,14 +217,16 @@ void initialize_pid_controller(pid_controller_t *pid_params, mcpwm_cmpr_handle_t
 
 void print_debug(void*arg){
     pid_controller_t *pid_params = (pid_controller_t *)arg;
-    int i = 1;
+    int i = 2;
     while (1)
     {
+        // ESP_LOGI(TAG, "%f %f %f %f", pid_params[0].target_speed, pid_params[1].target_speed, pid_params[2].target_speed, pid_params[3].target_speed);
         // vTaskDelay(pdMS_TO_TICKS(500));
         // pcnt_unit_get_count(pid_params[i].encoder, &encoder_pulses[i].curr_count);
         // ESP_LOGI(TAG, "%d", encoder_pulses[i].curr_count);
-        ESP_LOGI(TAG, "Delta Time: %lld", delta_time);
-        // ESP_LOGI(TAG, "Output: %f, Error: %f, Current Speed: %f, Delta Count: %d, Delta Time: %lld, P Term: %f, I Term: %f, D Term: %f", pid_params[i].output, pid_params[i].err, pid_params[i].curr_speed, encoder_pulses[i].delta_count, delta_time, pid_params[i].pTerm, pid_params[i].iTerm, pid_params[i].dTerm);
+        // ESP_LOGI(TAG, "Delta Time: %lld", delta_time);
+        // ESP_LOGI(TAG, "%d %d %d %d", encoder_pulses[0].curr_count, encoder_pulses[1].curr_count, encoder_pulses[2].curr_count, encoder_pulses[3].curr_count);
+        // ESP_LOGI(TAG, "Output: %f, Error: %f, Target Speed: %f, Current Speed: %f, Delta Count: %d, Delta Time: %lld, P Term: %f, I Term: %f, D Term: %f", pid_params[i].output, pid_params[i].err, pid_params[i].target_speed, pid_params[i].curr_speed, encoder_pulses[i].delta_count, delta_time, pid_params[i].pTerm, pid_params[i].iTerm, pid_params[i].dTerm);
     }
     
 }
