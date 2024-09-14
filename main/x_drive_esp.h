@@ -37,19 +37,22 @@ static const char *TAG = "Log";
 #define ENCODER4_PIN_A GPIO_NUM_26
 #define ENCODER4_PIN_B GPIO_NUM_25
 
+// PWM Cofiguration
 #define TIMER_RESOLUTION 80000000 // 80Mhz which is half of the 160Mhz source used
 #define COUNTER_PERIOD 4000 // 4000 ticks for 20kHz PWM used for Cytron MD10C motor driver
 
+#define MCPWM_COMPRATOR_MAX 1999 // Max value for comparator
+
+// PCNT Configuration
 #define PCNT_HIGH_LIMIT 32767 // Max for signed 16 bit counter
 #define PCNT_LOW_LIMIT -32768 // Min for signed 16 bit counter
-
-#define MCPWM_COMPRATOR_MAX 1999 // Max value for comparator
 
 #define INIT_TARGET_SPEED_M1 0 // Initial speed in pulse per us
 #define INIT_TARGET_SPEED_M2 0
 #define INIT_TARGET_SPEED_M3 0
 #define INIT_TARGET_SPEED_M4 0
 
+// PID Constant, needs to be adjusted of the sampling rate changes
 #define KP_M1 10000
 #define KI_M1 1000
 #define KD_M1 0
@@ -68,6 +71,10 @@ static const char *TAG = "Log";
 
 #define INTEGRAL_LIMIT_MAX 2000
 #define INTEGRAL_LIMIT_MIN -2000
+
+// Periodic timer period, will determine sampling rate of the PID loop
+// The PID constants needs to be modified if the sampling rate is changed
+#define TIMER_PERIOD 1000 
 
 typedef struct {
     mcpwm_cmpr_handle_t motor;
@@ -96,17 +103,23 @@ typedef struct {
     int delta_count;
 }encoder_pulses_t;
 
-// Global constants
+typedef struct{
+    int64_t prev_time;
+    int64_t curr_time;
+    int64_t delta_time;
+}time_t;
+
+// Global constants for GPIO pins
 extern const gpio_num_t encoder_array[4][2];
 extern const gpio_num_t motor_dir_array[4];
 
 // Global variables
 extern encoder_pulses_t encoder_pulses[4];
+extern time_t time_encoder;
 extern int64_t prev_time, curr_time, delta_time;   
 
 // Public functions
 void initialize_peripherals(pid_controller_t *pid_params);
-// void update_PID_output(void *encoder1);
 void print_debug(void *arg);
 
 // Private Functions

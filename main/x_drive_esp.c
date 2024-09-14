@@ -30,8 +30,7 @@ const gpio_num_t motor_dir_array[4] = {
 // All the encoder pulses are stored in this array
 // Global variable can be accessed by all functions
 encoder_pulses_t encoder_pulses[4] = {0};
-int64_t prev_time = 0, curr_time = 0, delta_time = 0;   
-
+time_t time_encoder = {0};
 
 void initialize_peripherals(pid_controller_t *pid_params){
 
